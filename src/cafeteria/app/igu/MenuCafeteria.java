@@ -11,20 +11,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MenuCafeteria {
+    
     // Para centrar las palabras
     public static void centrar (int largo, String palabra) {
-        System.out.println(" ".repeat((largo - palabra.length())/2) + palabra);
+        System.out.println(" ".repeat(Math.max((largo - palabra.length()) / 2, 0)) + palabra);
     }
     
     
     // Para imprimir el separador
     public static void separador (String simbolo, int largo) {
-        System.out.println(simbolo.repeat(largo) + "");
+        System.out.println(simbolo.repeat(Math.max(largo, 0)));
     }
-   
+    
     
     public static void centrarDerecha (int largo, String palabra) {
-        System.out.println(" ".repeat((largo - palabra.length())) + palabra);
+        System.out.println(" ".repeat(Math.max(largo - palabra.length(), 0)) + palabra);
     }
     
     // Ejecucion del programa
