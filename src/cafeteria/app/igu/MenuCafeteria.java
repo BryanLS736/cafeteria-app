@@ -1,6 +1,10 @@
 package cafeteria.app.igu;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -12,11 +16,17 @@ public class MenuCafeteria {
         System.out.println(" ".repeat((largo - palabra.length())/2) + palabra);
     }
     
+    
     // Para imprimir el separador
     public static void separador (String simbolo, int largo) {
         System.out.println(simbolo.repeat(largo) + "");
     }
    
+    
+    public static void centrarDerecha (int largo, String palabra) {
+        System.out.println(" ".repeat((largo - palabra.length())) + palabra);
+    }
+    
     // Ejecucion del programa
     public static void main(String[] args) {
         // Declaración y asignación para los métodos centrar y separador
@@ -61,7 +71,6 @@ public class MenuCafeteria {
             
             // Registrar pedido logica
             case "1" -> {
-                
                 // Elección de mesa
                 int mesa;
                 
@@ -98,20 +107,28 @@ public class MenuCafeteria {
                 
                 HashMap<Integer, String[]> productos = new HashMap<>();
                 
-                // Guarda los productos en un HashMap (id_producto, información)
-                productos.put(1, new String[] {"Cappuchino", "10.0"});
-                productos.put(2, new String[] {"Te negro", "6.0"});
-                productos.put(3, new String[] {"Galletas", "8.0"});
-                productos.put(4, new String[] {"Croissands", "3.0"});
-                productos.put(5, new String[] {"Sandwich", "6.0"});
+                // Guarda los productos en un HashMap (id_producto, información(nombre, precio, cantidad))
+                productos.put(1, new String[] {"Cappuchino", "10.0", "5"});
+                productos.put(2, new String[] {"Te negro", "6.0", "3"});
+                productos.put(3, new String[] {"Galletas", "8.0", "7"});
+                productos.put(4, new String[] {"Croissands", "3.0", "5"});
+                productos.put(5, new String[] {"Sandwich", "6.0", "4"});
                 
                 // Centinela del do-while
                 String continuar;
                 double total = 0;
                 
+                
+                // Productos guardados
+                List<List<String>> productosGuardados = new ArrayList<>();
+                
+                
                 // Bucle para definir si seguir comprando productos
                 do {
-
+                    // Se guarda los datos de un producto en este arrayList
+                    List<String> productoGuardado = new ArrayList<>();
+                    
+                    
                     // Bucle para mostrar el menu de productos disponibles
                     do {
                         MenuCafeteria.separador(simbolo, ancho);
@@ -123,8 +140,9 @@ public class MenuCafeteria {
                             int id = entrada.getKey();
                             String nombre = entrada.getValue()[0];
                             double precio = Double.parseDouble(entrada.getValue()[1]);
+                            String cantidad = entrada.getValue()[2];
                             
-                            System.out.println(id + ".- " + nombre + "  -  S/." + precio);
+                            System.out.println(id + ".- " + nombre + "  -  S/." + precio + "  -  " + ((cantidad.equalsIgnoreCase("Agotado")) ? cantidad : cantidad + " unidades"));
                         }
 
 
@@ -138,33 +156,75 @@ public class MenuCafeteria {
 
                         if (!productos.keySet().contains(opcionProducto)) {
                             System.out.println("El ID no existe!");
+                        } else if (productos.get(opcionProducto)[2].equalsIgnoreCase("agotado")) {
+                            System.out.println("El producto está agotado!");
                         } else {
                             String[] datosCompra = productos.get(opcionProducto);
+                            
                             System.out.println("El siguiente producto se ha agregado a su carrito!");
                             System.out.println("ID: " + opcionProducto);
                             System.out.println("Nombre: " + datosCompra[0]);
                             System.out.println("Precio: " + datosCompra[1]);
+                            
                             total += Double.parseDouble(datosCompra[1]);
+                            
                             System.out.println("Total momentaneo: " + total);
+                            
+                            productos.get(opcionProducto)[2] = String.valueOf(Integer.parseInt(productos.get(opcionProducto)[2]) - 1);
+                            
+                            // Se guarda el producto en un arraylist, y luego se guarda ese arraylist de producto en otro arraylist de productos
+                            productoGuardado.add(datosCompra[0]);
+                            productoGuardado.add(datosCompra[1]);
+                            productosGuardados.add(productoGuardado);
+                            
+                            if (Integer.parseInt(productos.get(opcionProducto)[2]) == 0) {
+                                productos.get(opcionProducto)[2] = "Agotado";
+                            }
                         }
                     
                     } while (!productos.keySet().contains(opcionProducto));
                     
-
                     MenuCafeteria.separador(simbolo, ancho);
                     System.out.print("Desea realizar otra compra? (S/N): ");
                     continuar = lector.nextLine();
 
                 } while (continuar.equalsIgnoreCase("s"));
                 
-                System.out.println("Se han guardados todos los productos");
-                System.out.println("El total de su compra es: " + total);
+                SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
+                SimpleDateFormat formatoHora = new SimpleDateFormat("HH:mm:ss");
+                Date today = new Date();
+                String horaStr = formatoHora.format(today);
+                String fechaStr = formatoFecha.format(today);
+                
+                // Boleta
+                int anchoBoleta = 40;
+                String simboloBoleta = "#";
+                
+                System.out.println("");
+                MenuCafeteria.separador(simboloBoleta, anchoBoleta);
+                MenuCafeteria.centrar(anchoBoleta, "CAFETERIA CENTRAL");
+                MenuCafeteria.centrar(anchoBoleta, "Fecha: " + fechaStr + " ".repeat(5) + "Hora: " + horaStr);
+                MenuCafeteria.separador(simboloBoleta, anchoBoleta);
+                MenuCafeteria.centrar(anchoBoleta, "N. MESA: " + mesa);
+                System.out.println("");
+                
+                for (List<String> producto : productosGuardados) {
+                    String mensaje = producto.get(0) + " - S/." + producto.get(1);
+                    MenuCafeteria.centrar(anchoBoleta, mensaje);
+                }
+                
+                MenuCafeteria.separador(simboloBoleta, anchoBoleta);
+                MenuCafeteria.centrarDerecha(anchoBoleta, "TOTAL: S/." + total);
+                MenuCafeteria.separador(simboloBoleta, anchoBoleta);
+                MenuCafeteria.centrar(anchoBoleta, "GRACIAS POR SU COMPRA, VUELVA PRONTO!");
+                MenuCafeteria.separador(simboloBoleta, anchoBoleta);
+                System.out.println("");
                 
             }
             
-            // Historial de pedidos
+            // Historial de pedidos (FALTA TERMINAR)
             case "2" -> {
-                
+                System.out.println("En progreso...");
             }
             
             // Salir
