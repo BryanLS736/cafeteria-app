@@ -1,0 +1,16 @@
+AVANCE 2 DE PROYECTO - TALLER DE PROGRAMACIÓN:
+
+Base de datos: arrays o arraylists
+Interfaz gráfica: en consola
+
+Ramas existentes:
+	Rama igu: Solo interfaz gráfica (asegura que un compañero trabaje solo en interfaz). --NO TOCAR TODAVIA
+	Rama lógica: Solo lógica que hace posible validar datos, llamar otros métodos, etc (asegura que otro se encargue de 
+            validaciones, lógica y persistencia)
+
+Paquetes del proyecto:
+	model: Clases con atributos, getters and setters (Por ejemplo - usuario: nombre, email, password o Platillo: id, nombre, 
+            precio, descripcion)
+	repository: leer/guardar datos del JSON.
+	service: Lógica del negocio (Por ejemplo: login(email y password), compra(id, cantidad, total))
+        controller: Interfaz + conexion con la logica (en el controller se llamará al service dependiendo si es login, compra, etc)
