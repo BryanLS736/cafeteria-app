@@ -10,8 +10,9 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+
 public class MenuCafeteria {
-    
     // Para centrar las palabras
     public static void centrar (int largo, String palabra) {
         System.out.println(" ".repeat(Math.max((largo - palabra.length()) / 2, 0)) + palabra);
@@ -205,16 +206,45 @@ public class MenuCafeteria {
         separador(simboloBoleta, anchoBoleta);
         System.out.println("");
     }
+  
+///NUEVOO-----------
+   public static void mostrarHistorialPedidos() {
+    if (historialPedidos.isEmpty()) {
+        System.out.println("No hay pedidos en el historial todavia.");
+    } else {
+        System.out.println("\n========= HISTORIAL DE PEDIDOS =========");
+        int contador = 1;
+        for (Map<String, Object> pedido : historialPedidos) {
+            System.out.println("\nPedido N. " + contador);
+            System.out.println("-------------------------");
+            System.out.println("Mesa: " + pedido.get("mesa"));
+            System.out.println("Productos:");
+            List<List<String>> productos = (List<List<String>>) pedido.get("productosGuardados");
+            for (List<String> prod : productos) {
+                System.out.println(" - " + prod.get(0) + " (S/." + prod.get(1) + ")");
+            }
+            System.out.println("Total: S/." + pedido.get("total"));
+            contador++;
+        }
+        System.out.println("\n========================================");
+    }
+}
+    static List<Map<String, Object>> historialPedidos = new ArrayList<>();
+    ///HASTA AQUI
     
     
-    // Ejecucion del programa
     public static void main(String[] args) {
-        Scanner lector = new Scanner(System.in);
+            
+       Scanner lector = new Scanner(System.in);
         int ancho = 50;
         String simbolo = "-";
+        String opcion;
         
-        String opcion = mostrarMenuPrincipal(lector, ancho, simbolo);
-        
+        //NUEVOOO(INICIO DEL DO-WHILE)-----
+
+        do {
+            opcion = mostrarMenuPrincipal(lector, ancho, simbolo);
+
         switch (opcion) {
             case "1" -> {
                 int mesa = elegirMesa(lector, ancho, simbolo);
@@ -224,17 +254,18 @@ public class MenuCafeteria {
                 Map<String, Object> resultado = registrarPedido(lector, productos, ancho, simbolo);
                 
                 imprimirBoleta(mesa, (List<List<String>>) resultado.get("productosGuardados"), (double) resultado.get("total"));
+                
+                resultado.put("mesa", mesa);
+                
+                historialPedidos.add(resultado);
             }
             
             // Historial de pedidos
             case "2" -> {
-                /*
-                byte opcionHistorial = 0;
-                do {
-                    
-                } while (opcionHistorial > 0 && opcionHistorial < );
-                */
+                //NUEVOOO(PUSE EL MÉTODO)------------
+                mostrarHistorialPedidos();
             }
+
             
             // Salir
             case "3" -> {
@@ -242,7 +273,10 @@ public class MenuCafeteria {
                 System.out.println("Usted ha salido del programa");
             }
         }
+           
+    //NUEVOOO(FIN DEL DO-WHILE)------------
+
+    } while (!opcion.equals("3")); 
         
     }
-    
 }
