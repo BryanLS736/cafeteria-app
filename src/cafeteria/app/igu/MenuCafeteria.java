@@ -25,7 +25,7 @@ public class MenuCafeteria {
     
     
     // Para imprimir a la derecha del todo
-    public static void centrarDerecha (int largo, String palabra) {
+    public static void moverDerecha (int largo, String palabra) {
         System.out.println(" ".repeat(Math.max(largo - palabra.length(), 0)) + palabra);
     }
     
@@ -103,10 +103,10 @@ public class MenuCafeteria {
     public static HashMap<Integer, String[]> inicializarProductos() {
         HashMap<Integer, String[]> productos = new HashMap<>();
         productos.put(1, new String[]{"Cappuchino", "10.0", "5"});
-        productos.put(2, new String[]{"Te negro", "6.0", "3"});
-        productos.put(3, new String[]{"Galletas", "8.0", "7"});
+        productos.put(2, new String[]{"Te negro", "6.0", "5"});
+        productos.put(3, new String[]{"Galletas", "8.0", "5"});
         productos.put(4, new String[]{"Croissants", "3.0", "5"});
-        productos.put(5, new String[]{"Sandwich", "6.0", "4"});
+        productos.put(5, new String[]{"Sandwich", "6.0", "5"});
         return productos;
     }
     
@@ -114,11 +114,11 @@ public class MenuCafeteria {
     // Método para registrar el pedido
     public static Map<String, Object> registrarPedido(Scanner lector, HashMap<Integer, String[]> productos, int ancho, String simbolo) {
         List<List<String>> productosGuardados = new ArrayList<>();
-        String continuar;
+        String continuar = "s";
         double total = 0;
         
         // Do-while para que se siga comprando si elige si, si elige no se termina el bucle
-        do {
+        while (continuar.equalsIgnoreCase("s")) {
             List<String> productoGuardado = new ArrayList<>();
             int opcionProducto = -1;
             boolean entradaValida = false;
@@ -181,9 +181,28 @@ public class MenuCafeteria {
             
             productos.get(opcionProducto)[2] = String.valueOf(Integer.parseInt(productos.get(opcionProducto)[2]) - 1);
 
-            productoGuardado.add(datosCompra[0]);
-            productoGuardado.add(datosCompra[1]);
-            productosGuardados.add(productoGuardado);
+            boolean existe = false;
+            
+            for (List<String> producto : productosGuardados) {
+                if (producto.get(0).equals(String.valueOf(opcionProducto))) {
+                    int cantidad = Integer.parseInt(producto.get(3));
+                    double totalPrecio = Double.parseDouble(producto.get(2));
+                    
+                    producto.set(3, String.valueOf(cantidad + 1));
+                    producto.set(2, String.valueOf(totalPrecio + Double.parseDouble(datosCompra[1])));
+                    existe = true;
+                    break;
+                }
+            }
+            
+            if (!existe) {
+                productoGuardado.add(String.valueOf(opcionProducto)); // Indice 0 - ID
+                productoGuardado.add(datosCompra[0]); // Indice 1 - Nombre
+                productoGuardado.add(datosCompra[1]); // Indice 2 - Total de ese producto (Precio unitario del producto x cantidad)
+                productoGuardado.add("1"); // Indice 3 - Cantidad
+                productosGuardados.add(productoGuardado);
+            }
+            
 
             // If que si el stock del producto llego a 0, cambia a "agotado"
             if (Integer.parseInt(productos.get(opcionProducto)[2]) == 0) {
@@ -193,8 +212,20 @@ public class MenuCafeteria {
             separador(simbolo, ancho);
             System.out.print("Desea realizar otra compra? (S/N): ");
             continuar = lector.nextLine();
+            
+            String respuestaEliminar;
+
+            do {
+                System.out.println("Desea eliminar algún producto? (S/N)");
+                respuestaEliminar = lector.nextLine();
                 
-        } while (continuar.equalsIgnoreCase("s"));
+                if (respuestaEliminar.equalsIgnoreCase("s")) {
+                    total = eliminarProductosCarrito(simbolo, ancho, productosGuardados, productos, total);
+                }
+            } while (respuestaEliminar.equalsIgnoreCase("s"));
+            
+                
+        }
         
         // Se guarda los productos elegidos y el total en un HashMap resultado
         Map<String, Object> resultado = new HashMap<>();
@@ -213,25 +244,44 @@ public class MenuCafeteria {
         String horaStr = formatoHora.format(today);
         String fechaStr = formatoFecha.format(today);
         int anchoBoleta = 40;
-        String simboloBoleta = "#";
+        String simboloBoleta = "=";
+        String simboloSeparación = "-";
+        String mesero = "Bryan Luque";
+        double igv = 0.18 * total;
 
         System.out.println("");
         separador(simboloBoleta, anchoBoleta);
         centrar(anchoBoleta, "CAFETERIA CENTRAL");
-        centrar(anchoBoleta, "Fecha: " + fechaStr + " ".repeat(5) + "Hora: " + horaStr);
+        centrar(anchoBoleta, "Jr. Los Pinos 123 - Lima, Peru");
+        centrar(anchoBoleta, "RUC: 234567891011  Tel:987-654-321");
         separador(simboloBoleta, anchoBoleta);
-        centrar(anchoBoleta, "N. MESA: " + mesa);
+        
         System.out.println("");
+        System.out.printf("%s%23s\n", ("Fecha: " + fechaStr), ("Hora: " + horaStr));
+        System.out.printf("%s\n", ("Numero de mesa: " + mesa));
+        System.out.printf("%s\n", ("Cajero: " + mesero));
+        System.out.println("");
+        
+        separador(simboloSeparación, anchoBoleta);
+        String mensajeEncabezado = String.format("%-6s%-24s%-6s", "Cant.", "Descripcion", "Precio");
+        System.out.println(mensajeEncabezado);
+        separador(simboloSeparación, anchoBoleta);
 
         // Recorre cada producto de los productos guardados
         for (List<String> producto : productosGuardados) {
-            String mensaje = producto.get(0) + " - S/." + producto.get(1);
-            centrar(anchoBoleta, mensaje);
+            String mensaje = String.format("%-6s%-24s%-6s", producto.get(3), producto.get(1), ("S/ " + producto.get(2)));
+            System.out.println(mensaje);
         }
         
+        separador(simboloSeparación, anchoBoleta);
+        System.out.printf("SUBTOTAL:%-21s%-11s\n", " ", ("S/ " + total));
+        System.out.printf("IGV (18%%):%-20sS/ %-8.2f\n", " ", igv);
+        
+        separador(simboloSeparación, anchoBoleta);
+        System.out.printf("TOTAL A PAGAR:%-16sS/ %-8.2f\n", " ", (total + igv));
+        
         separador(simboloBoleta, anchoBoleta);
-        centrarDerecha(anchoBoleta, "TOTAL: S/." + total);
-        separador(simboloBoleta, anchoBoleta);
+        System.out.println("");
         centrar(anchoBoleta, "GRACIAS POR SU COMPRA, VUELVA PRONTO!");
         separador(simboloBoleta, anchoBoleta);
         System.out.println("");
@@ -247,24 +297,45 @@ public class MenuCafeteria {
         } else {
             System.out.println("\n========= HISTORIAL DE PEDIDOS =========");
             int contador = 1;
+            int ancho = 40;
+            String sep1 = "=";
+            String sep2 = "-";
             
             // Recorre la lista de historial pedidos
             for (Map<String, Object> pedido : historialPedidos) {
-                System.out.println("\nPedido N. " + contador);
-                System.out.println("-------------------------");
+                separador(sep1, ancho);
+                System.out.println("Pedido N. " + contador);
+                separador(sep1, ancho);
+                
                 System.out.println("Mesa: " + pedido.get("mesa"));
-                System.out.println("Productos:");
-                List<List<String>> productos = (List<List<String>>) pedido.get("productosGuardados");
+                
+                List<List<String>> productosGuardados = (List<List<String>>) pedido.get("productosGuardados");
+                double total = (double) pedido.get("total");
+                double igv = total * 0.18;
+                
+                separador(sep2, ancho);
+                System.out.printf("%-6s%-24s%-6s\n", "Cant.", "Descripcion", "Precio");
+                separador(sep2, ancho);
                 
                 // Recorre la lista productos que contiene una lista de los productos guardados de cada pedido
-                for (List<String> prod : productos) {
-                    System.out.println(" - " + prod.get(0) + " (S/." + prod.get(1) + ")");
+                for (List<String> prod : productosGuardados) {
+                    System.out.printf("%-6s%-24s%-6s\n", prod.get(3), prod.get(1), "S/ " + prod.get(2));
                 }
-                System.out.println("Total: S/." + pedido.get("total"));
+                
+                separador(sep2, ancho);
+                System.out.printf("SUBTOTAL:%-21s%-11s\n", " ", ("S/ " + total));
+                System.out.printf("IGV (18%%):%-20sS/ %-8.2f\n", " ", igv);
+
+                separador(sep2, ancho);
+                System.out.printf("TOTAL A PAGAR:%-16sS/ %-8.2f\n", " ", (total + igv));
+
+                separador(sep1, ancho);
+                System.out.println("");
                 contador++;
             }
             
-            System.out.println("\n========================================");
+            System.out.println("============FIN DEL HISTORIAL===========");
+            System.out.println("");
         }
     }
     
@@ -272,6 +343,50 @@ public class MenuCafeteria {
     // Lista global del proyecto, que podemos acceder a ella
     static List<Map<String, Object>> historialPedidos = new ArrayList<>();
     
+    
+    public static double eliminarProductosCarrito(String simbolo, int ancho,List<List<String>> productosGuardados, Map<Integer, String[]> productos, double total) {
+        Scanner lector = new Scanner(System.in);
+        
+        if (productosGuardados.isEmpty()) {
+            System.out.println("El carrito está vacio, no hay nada para eliminar!");
+        } else {
+            separador(simbolo, ancho);
+            centrar(ancho, "PRODUCTOS EN EL CARRITO");
+            separador(simbolo, ancho);
+            
+            for (int i = 0; i < productosGuardados.size(); i++) {
+                List<String> producto = productosGuardados.get(i);
+                System.out.printf("%d) %s  x  %s  -  S/ %s\n", (i + 1), producto.get(1), producto.get(3), producto.get(2));
+            }
+            
+            separador(simbolo, ancho);
+            
+            System.out.println("Ingrese el numero del producto a eliminar: ");
+            int opcion = lector.nextInt();
+            separador(simbolo, ancho);
+            
+            if (opcion < 1 || opcion > productosGuardados.size()) {
+                System.out.println("Opcion invalida.");
+                separador(simbolo, ancho);
+            } else {
+                List<String> productoElegido = productosGuardados.get(opcion - 1);
+                int id = Integer.parseInt(productoElegido.get(0));
+                int cantidad = Integer.parseInt(productoElegido.get(3));
+                double precio = Double.parseDouble(productoElegido.get(2));
+                
+                productos.get(id)[2] = String.valueOf(Integer.parseInt(productos.get(id)[2]) + cantidad);
+                productosGuardados.remove(opcion - 1);
+                total -= precio;
+                System.out.println("Producto eliminado del carrito!");
+            }
+            
+        }
+        return total;
+    }
+    
+    
+    // Se pone afuera para que no se reinicie a cada momento
+    static HashMap<Integer, String[]> productos = inicializarProductos(); // HashMap de los productos disponibles
     
     // Método main que ejecuta todo el proyecto
     public static void main(String[] args) {
@@ -288,14 +403,24 @@ public class MenuCafeteria {
                 // Registrar pedidos
                 case "1" -> {
                     int mesa = elegirMesa(lector, ancho, simbolo); // Retorna el numero de mesa
-                    HashMap<Integer, String[]> productos = inicializarProductos(); // HashMap de los productos disponibles
                     Map<String, Object> resultado = registrarPedido(lector, productos, ancho, simbolo); // Agrega los pedidos a resultado
-                    // Retorna la boleta
-                    imprimirBoleta(mesa, (List<List<String>>) resultado.get("productosGuardados"), (double) resultado.get("total"));
+                    
+                    List<List<String>> carrito = (List<List<String>>) resultado.get("productosGuardados");
+                    double total = 0;
+                    
+                    for (List<String> prod : carrito) {
+                        total += Double.parseDouble(prod.get(2));
+                    }
+                    
                     // Agrega la mesa a resultado
+                    resultado.put("total", total);
                     resultado.put("mesa", mesa);
+                    
                     // Agrega resultado al historial de pedidos (resultados contiene la información importante de cada pedido)
                     historialPedidos.add(resultado);
+                    
+                    // Retorna la boleta
+                    imprimirBoleta(mesa, carrito, total);
                 }
 
                 // Historial de pedidos
