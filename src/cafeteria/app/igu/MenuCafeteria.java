@@ -112,6 +112,10 @@ public class MenuCafeteria {
     }
     
     
+    // Se pone afuera para que no se reinicie a cada momento
+    static HashMap<Integer, String[]> productos = inicializarProductos(); // HashMap de los productos disponibles
+    
+    
     // Método para registrar el pedido
     public static Map<String, Object> registrarPedido(Scanner lector, HashMap<Integer, String[]> productos, int ancho, String simbolo) {
         List<List<String>> productosGuardados = new ArrayList<>();
@@ -237,6 +241,47 @@ public class MenuCafeteria {
     }
     
     
+    public static double eliminarProductosCarrito(String simbolo, int ancho,List<List<String>> productosGuardados, Map<Integer, String[]> productos, double total) {
+        Scanner lector = new Scanner(System.in);
+        
+        if (productosGuardados.isEmpty()) {
+            System.out.println("El carrito está vacio, no hay nada para eliminar!");
+        } else {
+            separador(simbolo, ancho);
+            centrar(ancho, "PRODUCTOS EN EL CARRITO");
+            separador(simbolo, ancho);
+            
+            for (int i = 0; i < productosGuardados.size(); i++) {
+                List<String> producto = productosGuardados.get(i);
+                System.out.printf("%d) %s  x  %s  -  S/ %s\n", (i + 1), producto.get(1), producto.get(3), producto.get(2));
+            }
+            
+            separador(simbolo, ancho);
+            
+            System.out.println("Ingrese el numero del producto a eliminar: ");
+            int opcion = lector.nextInt();
+            separador(simbolo, ancho);
+            
+            if (opcion < 1 || opcion > productosGuardados.size()) {
+                System.out.println("Opcion invalida.");
+                separador(simbolo, ancho);
+            } else {
+                List<String> productoElegido = productosGuardados.get(opcion - 1);
+                int id = Integer.parseInt(productoElegido.get(0));
+                int cantidad = Integer.parseInt(productoElegido.get(3));
+                double precio = Double.parseDouble(productoElegido.get(2));
+                
+                productos.get(id)[2] = String.valueOf(Integer.parseInt(productos.get(id)[2]) + cantidad);
+                productosGuardados.remove(opcion - 1);
+                total -= precio;
+                System.out.println("Producto eliminado del carrito!");
+            }
+            
+        }
+        return total;
+    }
+    
+    
     // Método que imprime la boleta
     public static void imprimirBoleta(int mesa, List<List<String>> productosGuardados, double total) {
         SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
@@ -345,51 +390,6 @@ public class MenuCafeteria {
     static List<Map<String, Object>> historialPedidos = new ArrayList<>();
     
     
-    public static double eliminarProductosCarrito(String simbolo, int ancho,List<List<String>> productosGuardados, Map<Integer, String[]> productos, double total) {
-        Scanner lector = new Scanner(System.in);
-        
-        if (productosGuardados.isEmpty()) {
-            System.out.println("El carrito está vacio, no hay nada para eliminar!");
-        } else {
-            separador(simbolo, ancho);
-            centrar(ancho, "PRODUCTOS EN EL CARRITO");
-            separador(simbolo, ancho);
-            
-            for (int i = 0; i < productosGuardados.size(); i++) {
-                List<String> producto = productosGuardados.get(i);
-                System.out.printf("%d) %s  x  %s  -  S/ %s\n", (i + 1), producto.get(1), producto.get(3), producto.get(2));
-            }
-            
-            separador(simbolo, ancho);
-            
-            System.out.println("Ingrese el numero del producto a eliminar: ");
-            int opcion = lector.nextInt();
-            separador(simbolo, ancho);
-            
-            if (opcion < 1 || opcion > productosGuardados.size()) {
-                System.out.println("Opcion invalida.");
-                separador(simbolo, ancho);
-            } else {
-                List<String> productoElegido = productosGuardados.get(opcion - 1);
-                int id = Integer.parseInt(productoElegido.get(0));
-                int cantidad = Integer.parseInt(productoElegido.get(3));
-                double precio = Double.parseDouble(productoElegido.get(2));
-                
-                productos.get(id)[2] = String.valueOf(Integer.parseInt(productos.get(id)[2]) + cantidad);
-                productosGuardados.remove(opcion - 1);
-                total -= precio;
-                System.out.println("Producto eliminado del carrito!");
-            }
-            
-        }
-        return total;
-    }
-    
-    
-    // Se pone afuera para que no se reinicie a cada momento
-    static HashMap<Integer, String[]> productos = inicializarProductos(); // HashMap de los productos disponibles
-    
-    
     //Método para generar el reporte
     public static void mostrarReporteGeneral(int ancho, String simbolo) {
 
@@ -455,6 +455,7 @@ public class MenuCafeteria {
     separador("-", ancho);
     System.out.println(productoMasVendido + " - " + maxCant + " unidades vendidas");
 }
+    
     
     // Método main que ejecuta todo el proyecto
     public static void main(String[] args) {
