@@ -42,7 +42,8 @@ public class MenuCafeteria {
             centrar(ancho, "MENU DE PEDIDOS");
             System.out.println("1.- Registrar pedido");
             System.out.println("2.- Historial de pedidos");
-            System.out.println("3.- Salir");
+            System.out.println("3.- Reporte General");
+            System.out.println("4.- Salir");
             separador(simbolo, ancho);
 
             System.out.print("Escriba su opcion (1, 2 o 3): ");
@@ -388,6 +389,73 @@ public class MenuCafeteria {
     // Se pone afuera para que no se reinicie a cada momento
     static HashMap<Integer, String[]> productos = inicializarProductos(); // HashMap de los productos disponibles
     
+    
+    //Método para generar el reporte
+    public static void mostrarReporteGeneral(int ancho, String simbolo) {
+
+    if (historialPedidos.isEmpty()) {
+        System.out.println("No hay pedidos registrados aun.");
+        return;
+    }
+
+    int totalPedidos = historialPedidos.size();
+    int totalProductosVendidos = 0;
+    double totalGeneral = 0;
+
+    HashMap<String, Integer> contadorProductos = new HashMap<>();
+
+    // Recorrer todos los pedidos
+    for (Map<String, Object> pedido : historialPedidos) {
+
+        double total = (double) pedido.get("total");
+        totalGeneral += total;
+
+        List<List<String>> productos = (List<List<String>>) pedido.get("productosGuardados");
+
+        for (List<String> prod : productos) {
+            int cantidad = Integer.parseInt(prod.get(3));
+            totalProductosVendidos += cantidad;
+
+            String nombre = prod.get(1);
+            contadorProductos.put(nombre,
+                contadorProductos.getOrDefault(nombre, 0) + cantidad
+            );
+        }
+    }
+
+    // Buscar producto más vendido
+    String productoMasVendido = "Ninguno";
+    int maxCant = 0;
+
+    for (String nombre : contadorProductos.keySet()) {
+        int cant = contadorProductos.get(nombre);
+        if (cant > maxCant) {
+            maxCant = cant;
+            productoMasVendido = nombre;
+        }
+    }
+
+    // ==============================
+    //   IMPRESIÓN DEL REPORTE
+    // ==============================
+    separador("=", ancho);
+    centrar(ancho, "REPORTE GENERAL");
+    separador("=", ancho);
+
+    System.out.println("Total de pedidos realizados: " + totalPedidos);
+    System.out.println("Total de productos vendidos: " + totalProductosVendidos);
+
+    separador("-", ancho);
+    centrar(ancho, "DINERO RECAUDADO");
+    separador("-", ancho);
+    System.out.printf("TOTAL GENERAL: S/ %.2f\n", totalGeneral);
+
+    separador("-", ancho);
+    centrar(ancho, "PRODUCTO MAS VENDIDO");
+    separador("-", ancho);
+    System.out.println(productoMasVendido + " - " + maxCant + " unidades vendidas");
+}
+    
     // Método main que ejecuta todo el proyecto
     public static void main(String[] args) {
         Scanner lector = new Scanner(System.in);
@@ -430,12 +498,16 @@ public class MenuCafeteria {
 
                 // Opcion para salir
                 case "3" -> {
+                    mostrarReporteGeneral(ancho, simbolo);
+
+                }
+                case "4" -> {
                     System.out.println("Saliendo del programa...");
                     System.out.println("Usted ha salido del programa");
                 }
             }
 
         } while (!opcion.equals("3")); // Fin del do-while 
-        
+    
     }
 }
