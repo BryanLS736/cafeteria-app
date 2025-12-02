@@ -32,7 +32,7 @@ public class MenuCafeteria {
     
     // Método que muestra el menú principal del proyecto
     public static String mostrarMenuPrincipal(Scanner lector, int ancho, String simbolo) {
-        Pattern patronOpcion = Pattern.compile("^(1|2|3)$");
+        Pattern patronOpcion = Pattern.compile("^(1|2|3|4)$");
         String opcion;
         Matcher matchOpcion;
         
@@ -46,14 +46,14 @@ public class MenuCafeteria {
             System.out.println("4.- Salir");
             separador(simbolo, ancho);
 
-            System.out.print("Escriba su opcion (1, 2 o 3): ");
+            System.out.print("Escriba su opcion (1, 2, 3 o 4): ");
             opcion = lector.nextLine();
             matchOpcion = patronOpcion.matcher(opcion);
 
             // El if se muestra si no se cumple con el patron
             if (!matchOpcion.matches()) {
                 separador(simbolo, ancho);
-                System.out.println("Opcion no valida, ingrese 1, 2 o 3.");
+                System.out.println("Opcion no valida, ingrese 1, 2, 3 o 4.");
             }
         } while (!matchOpcion.matches());
 
@@ -221,7 +221,7 @@ public class MenuCafeteria {
             String respuestaEliminar;
 
             do {
-                System.out.println("Desea eliminar algún producto? (S/N)");
+                System.out.print("Desea eliminar algun producto? (S/N): ");
                 respuestaEliminar = lector.nextLine();
                 
                 if (respuestaEliminar.equalsIgnoreCase("s")) {
@@ -245,7 +245,7 @@ public class MenuCafeteria {
         Scanner lector = new Scanner(System.in);
         
         if (productosGuardados.isEmpty()) {
-            System.out.println("El carrito está vacio, no hay nada para eliminar!");
+            System.out.println("El carrito esta vacio, no hay nada para eliminar!");
         } else {
             separador(simbolo, ancho);
             centrar(ancho, "PRODUCTOS EN EL CARRITO");
@@ -258,8 +258,9 @@ public class MenuCafeteria {
             
             separador(simbolo, ancho);
             
-            System.out.println("Ingrese el numero del producto a eliminar: ");
+            System.out.print("Ingrese el numero del producto a eliminar: ");
             int opcion = lector.nextInt();
+            lector.nextLine();
             separador(simbolo, ancho);
             
             if (opcion < 1 || opcion > productosGuardados.size()) {
@@ -268,10 +269,15 @@ public class MenuCafeteria {
             } else {
                 List<String> productoElegido = productosGuardados.get(opcion - 1);
                 int id = Integer.parseInt(productoElegido.get(0));
-                int cantidad = Integer.parseInt(productoElegido.get(3));
                 double precio = Double.parseDouble(productoElegido.get(2));
+                int cantidad = Integer.parseInt(productoElegido.get(3));
                 
-                productos.get(id)[2] = String.valueOf(Integer.parseInt(productos.get(id)[2]) + cantidad);
+                if (!productos.get(id)[2].equalsIgnoreCase("Agotado")) {
+                    productos.get(id)[2] = String.valueOf(Integer.parseInt(productos.get(id)[2]) + cantidad);
+                } else {
+                    productos.get(id)[2] = productosGuardados.get(opcion - 1).get(3);
+                }
+                
                 productosGuardados.remove(opcion - 1);
                 total -= precio;
                 System.out.println("Producto eliminado del carrito!");
@@ -508,7 +514,7 @@ public class MenuCafeteria {
                 }
             }
 
-        } while (!opcion.equals("3")); // Fin del do-while 
+        } while (!opcion.equals("4")); // Fin del do-while 
     
     }
 }
